@@ -8,7 +8,7 @@
     "start:watch": "nodemon src/index.js",
     "test": "jest"
   },
-  "author": "",
+  "author": "Eduardo Rodrigues da Silva",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^10.0.0",
