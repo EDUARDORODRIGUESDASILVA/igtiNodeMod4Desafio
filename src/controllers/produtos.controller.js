@@ -21,9 +21,7 @@ async function createOrUpdateProduct(req, res, next) {
 
     if (!result.isEmpty()) {
       res.status(400).json({erros: result.array()});
-      // text and/or done have errors.
-      // Errors in the token as validated in the
-      // previous route are not accounted here.
+      return;
     }
 
     const l = await produtoService.getProdutoByCodigo(req.body.codigo);
@@ -31,13 +29,16 @@ async function createOrUpdateProduct(req, res, next) {
     if (!l) {
       const c = await produtoService.createProduto(req.body);
       res.status(201).json(c);
+      return;
     } else {
       const c = await produtoService.updateProduto(req.body);
       res.status(200).json(c);
+      return;
     }
   } catch (error) {
     global.logger.error({statusCode: 400, message: error});
     res.status(400).json({erro: 'Erro ao processar a requisição'});
+    return;
   }
 }
 /* GET:  retorna  uma  lista  com  todos  os  registros
@@ -47,9 +48,11 @@ async function listProducts(req, res, next) {
   try {
     const c = await produtoService.getAllProducts();
     res.status(200).json(c);
+    return;
   } catch (error) {
     global.logger.error({statusCode: 400, message: error});
     res.status(400).json({erro: 'Erro ao processar a requisição'});
+    return;
   }
 }
 /* ATENÇÃO: não é necessário realizar a leitura para
@@ -66,9 +69,11 @@ async function listProductByCodigo(req, res, next) {
     const c = await produtoService.getProdutoByCodigo(codigo);
 
     res.status(200).json(c);
+    return;
   } catch (error) {
     global.logger.error({statusCode: 400, message: error});
     res.status(400).json({erro: 'Erro ao processar a requisição'});
+    return;
   }
 }
 
@@ -91,6 +96,7 @@ async function updateProduct(req, res, next) {
 
     if (!result.isEmpty()) {
       res.status(400).json({erros: result.array()});
+      return;
       // text and/or done have errors.
       // Errors in the token as validated in the
       // previous route are not accounted here.
@@ -102,10 +108,12 @@ async function updateProduct(req, res, next) {
     } else {
       const c = await produtoService.updateProduto(req.body);
       res.status(200).json(c);
+      return;
     }
   } catch (error) {
     global.logger.error({statusCode: 400, message: error});
     res.status(400).json({erro: 'Erro ao processar a requisição'});
+    return;
   }
 }
 /*
@@ -115,32 +123,26 @@ Caso  não  seja  encontrado  um produto com o mesmo código,
 um HTTP 405 deverá ser retornado juntamente com
 uma mensagem informando o(s) erro(s) observado(s).
 */
+
 async function deleteProductByCodigo(req, res, next) {
-  try {
-    await check('codigo', 'Nome deve ser informado').notEmpty().run(req);
-
-    const result = validationResult(req);
-
-    if (!result.isEmpty()) {
-      res.status(400).json({erros: result.array()});
-      return;
-    }
-    const l = await produtoService.getProdutoByCodigo(req.body.codigo);
-
-    if (!l) {
-      res.status(405).json({erros: 'Produto não localizado'});
-      res.end();
-      return;
-    } {
-      await produtoService.deleteProdutoByCodigo(req.body.codigo);
-      res.status(200);
-      return;
-    }
-  } catch (error) {
-    global.logger.error({statusCode: 400, message: error});
-    res.status(400).json({erro: 'Erro ao processar a requisição'});
+  await check('codigo', 'Nome deve ser informado').notEmpty().run(req);
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    res.status(400).json({erros: result.array()});
+    return;
+  }
+  const l = await produtoService.getProdutoByCodigo(req.body.codigo);
+  if (!l) {
+    res.status(405).json({erros: 'Produto não localizado'});
+    res.end();
+    return;
+  } else {
+    const c = await produtoService.deleteProdutoByCodigo(req.body.codigo);
+    res.status(200).json(c);
+    res.end();
   }
 }
+
 export default {
   createOrUpdateProduct,
   listProducts,

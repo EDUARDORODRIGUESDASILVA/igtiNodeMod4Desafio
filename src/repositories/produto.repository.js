@@ -8,6 +8,7 @@ async function createProduto(produto) {
     throw err;
   }
 }
+
 async function getProdutoByCodigo(codigo) {
   try {
     return await Produto.findByPk(codigo);
@@ -18,7 +19,7 @@ async function getProdutoByCodigo(codigo) {
 
 async function deleteProduto(codigo) {
   try {
-    await Produto.destroy({
+    return await Produto.destroy({
       where: {
         codigo,
       },
